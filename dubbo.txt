@@ -1,0 +1,67 @@
+Spring Boot是什么？
+Spring Boot提供了一个强大的一键式Spring的集成开发环境，能够单独进行一个Spring应用的开发，其中：
+
+（1）集中式配置（application.properties）+注解，大大简化了开发流程
+（2）内嵌的Tomcat和Jetty容器，可直接打成jar包启动，无需提供Java war包以及繁琐的Web配置
+（3）提供了Spring各个插件的基于Maven的pom模板配置，开箱即用，便利无比。
+（4）可以在任何你想自动化配置的地方，实现可能
+（5）提供更多的企业级开发特性，如何系统监控，健康诊断，权限控制
+（6） 无冗余代码生成和XML强制配置
+（7）提供支持强大的Restfult风格的编码，非常简洁
+
+
+最近项目中，由于要写一个服务，所以就用到了比较方便的Spring Boot项目，之前也用过，和这次不一样的是这次的项目里面要使用阿里的duboo组件，作为服务化管理中心，原本的普通的spring项目集成dubbo是非常简单的，但由于用的Spring Boot，在网上搜了一下，还没有找到相关的资料的，所以就自己尝试了一下，发现并没有想象中的那么难，因为毕竟都是Spring自家的东西，没有理由不支持duboo。
+
+
+当然这里这个例子，我是服务使用方，会调用别人提供的duboo服务，所以要通过xml声明duboo的服务发布方 , Spring Boot其实是支持xml的bean初始化的，虽然不推荐使用，但是它还是有这个功能的，Spring Boot更推荐的使用方式是注解+集中式的properties文件配置，但由于必须要使用Spring Boot，所以不得不这样干了， 先看下duboo的xml配置，该文件位于resource目录下：
+
+另外在resource目录下，还需要加入dubbo.properties文件
+dubbo.application.name=xxxx
+dubbo.application.owner=xxxx
+dubbo.application.logger=slf4j
+dubbo.registry.address=zookeeper://zk.xxxx.com:2181
+dubbo.monitor.protocol=registry
+dubbo.protocol.name=dubbo
+dubbo.protocol.port=20887
+dubbo.service.loadbalance=roundrobin
+# dubbo \u8bbe\u8ba1\u7684\u65f6\u5019\u4e00\u53f0\u673a\u5668\u4e4b\u8fd0\u884c\u4e00\u4e2ajvm\uff0c\u73b0\u5728\u591a\u4e2a\u540c\u65f6\u4f7f\u7528\uff0c\u9700\u8981\u4fee\u6539\u914d\u7f6e\u9879
+dubbo.registry.file=/ROOT/tmp/dubbo_cus/www_xxxxx_cn.properties
+
+
+然后需要在maven的pom文件中，加入duboo的依赖：
+         <!-- dubbo dependency -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>dubbo</artifactId>
+                <version>2.4.1<</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>spring</artifactId>
+                        <groupId>org.springframework</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+
+OK，接下来需要在Spring Boot的主启动类加上，第一步的定义的duboo的xml文件，截图：
+
+package com.anytrust.index.manager;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
+
+@ComponentScan//组件扫描
+@Configuration//配置控制
+@EnableAutoConfiguration//启用自动配置
+@ImportResource({"classpath:dubboContext.xml"}) //加入spring的bean的xml文件
+public class ApplicationMain {
+    public static void main(String[] args) throws Exception {
+        //启动Spring Boot项目的唯一入口
+        SpringApplication.run(ApplicationMain.class, args);
+
+    }
+
+}
