@@ -1,6 +1,7 @@
 package com.meeting.controller;
 
 
+import com.meeting.config.EmailSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.meeting.model.User;
 import com.meeting.service.UserService;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -23,6 +25,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Resource(name = "emailSender")
+    private EmailSender emailSender;
 
     @RequestMapping("/getUserInfo")
     public String greeting(Model model,HttpServletRequest request) {
@@ -40,6 +45,8 @@ public class UserController {
 
         model.addAttribute("user", user);
         model.addAttribute("name", user.getAge());
+
+        emailSender.sender("407231704@qq.com","测试邮件","测试");
 
         return "index";
     }

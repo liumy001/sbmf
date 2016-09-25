@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -12,7 +13,10 @@ import org.springframework.stereotype.Component;
 @Component("emailSender")
 public class EmailSender {
 	private Logger logger = LoggerFactory.getLogger(EmailSender.class);
-	private String defaultFrom = "server1@qq.com";
+
+	@Autowired
+	private Environment env;
+
 	@Autowired
 	private JavaMailSender javaMailSender;
 	
@@ -58,7 +62,7 @@ public class EmailSender {
 		}
 		
 		SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-		simpleMailMessage.setFrom(defaultFrom);
+		simpleMailMessage.setFrom(env.getProperty("emali.from.user"));
 		simpleMailMessage.setTo(to);
 		simpleMailMessage.setSubject(subject);
 		simpleMailMessage.setText(content);
